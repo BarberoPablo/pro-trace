@@ -15,11 +15,12 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   const colorInputRef = React.useRef<HTMLInputElement>(null);
   const [strokeColor, setStrokeColor] = React.useState(initialColor);
   const [strokeWidth, setStrokeWidth] = React.useState(1);
+  const [history, setHistory] = React.useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = React.useState<number>(-1);
+  const [isCanvasReady, setIsCanvasReady] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (editor?.canvas) {
-      console.log("asd");
-      console.log(editor.canvas.__eventListeners["mouse:wheel"]);
       const img = new Image();
       img.src = radiografia;
       img.onload = function () {
@@ -27,12 +28,37 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
         editor.canvas.setHeight(img.height);
         editor.canvas.setBackgroundImage(radiografia, editor.canvas.renderAll.bind(editor.canvas));
         editor.canvas.freeDrawingBrush.color = initialColor;
+        setIsCanvasReady(true);
       };
     }
   }, [editor]);
 
   React.useEffect(() => {
-    console.log("@");
+    if (isCanvasReady) {
+      if (editor) {
+        const initialCanvasState = editor.canvas.toJSON();
+        setHistory([initialCanvasState]);
+        setHistoryIndex((prevState) => prevState + 1);
+      }
+    }
+  }, [editor, isCanvasReady]);
+
+  const saveHistory = React.useCallback(() => {
+    if (editor) {
+      const json = editor.canvas.toJSON();
+      if (json) {
+        setHistory((prevHistory) => {
+          const newHistory = prevHistory.slice(0, historyIndex + 1);
+          newHistory.push(json);
+          return newHistory;
+        });
+
+        setHistoryIndex((prevIndex) => prevIndex + 1);
+      }
+    }
+  }, [editor, historyIndex]);
+
+  React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "z") {
         console.log("atras");
@@ -45,25 +71,50 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       }
     };
 
-    const handlePathCreated = () => {
+    const onPathCreated = () => {
       if (editor && editor.canvas.isDrawingMode) {
-        console.log("save");
+        saveHistory();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
 
     if (editor?.canvas) {
-      editor.canvas.on("path:created", handlePathCreated);
+      editor.canvas.on("path:created", onPathCreated);
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       if (editor?.canvas) {
-        editor.canvas.off("path:created", handlePathCreated);
+        editor.canvas.off("path:created", onPathCreated);
       }
     };
-  }, [editor]);
+  }, [editor, saveHistory]);
+
+  // Modificar otras funciones que realizan cambios en el lienzo de manera similar
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      let hIndex = 0;
+      setHistoryIndex((prevIndex) => {
+        hIndex = prevIndex;
+        return prevIndex - 1;
+      });
+      editor?.canvas.loadFromJSON(history[hIndex - 1], () => {
+        editor?.canvas.renderAll();
+        //setHistoryIndex((prevIndex) => prevIndex - 1);
+      });
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      editor?.canvas.loadFromJSON(history[historyIndex + 1], () => {
+        editor?.canvas.renderAll();
+        setHistoryIndex((prevIndex) => prevIndex + 1);
+      });
+    }
+  };
 
   const handleAddSquare = () => {
     if (editor) {
@@ -141,6 +192,14 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                 left: 150,
               }}
             />
+
+            <ButtonTooltip title="Deshacer" handler={handleUndo}>
+              Undo
+            </ButtonTooltip>
+
+            <ButtonTooltip title="Rehacer" handler={handleRedo}>
+              Redo
+            </ButtonTooltip>
 
             <ButtonTooltip title="Dibujar" handler={toggleDraw}>
               <CreateRounded />
