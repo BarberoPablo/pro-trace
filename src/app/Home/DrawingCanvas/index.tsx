@@ -77,16 +77,21 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    const handleObjectModified = () => {
+      saveHistory();
+    };
 
+    window.addEventListener("keydown", handleKeyDown);
     if (editor?.canvas) {
       editor.canvas.on("path:created", onPathCreated);
+      editor.canvas.on("object:modified", handleObjectModified);
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       if (editor?.canvas) {
         editor.canvas.off("path:created", onPathCreated);
+        editor.canvas.off("object:modified", handleObjectModified);
       }
     };
   }, [editor, saveHistory]);
@@ -123,10 +128,11 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  const onAddCircle = () => {
+  const handleAddCircle = () => {
     if (editor) {
       editor.addCircle();
       editor.canvas.isDrawingMode = false;
+      saveHistory();
     }
   };
 
@@ -217,7 +223,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               OUT
             </ButtonTooltip>
 
-            <ButtonTooltip title="Colocar círculo" handler={onAddCircle} /* style={{ backgroundColor: strokeColor }} */>
+            <ButtonTooltip title="Colocar círculo" handler={handleAddCircle} /* style={{ backgroundColor: strokeColor }} */>
               <Circle />
             </ButtonTooltip>
 
