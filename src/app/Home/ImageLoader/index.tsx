@@ -1,7 +1,8 @@
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import { IconButton, Typography } from "@mui/material";
+import { UploadFile } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import React from "react";
 import { Accept, FileWithPath, useDropzone } from "react-dropzone";
+import ButtonTooltip from "../DrawingCanvas/components/ButtonTooltip";
 
 export default function ImageLoader({ setImage }: { setImage: (image: string) => void }) {
   const handleDrop = React.useCallback(
@@ -26,17 +27,11 @@ function DropZone({ onDrop }: { onDrop: (acceptedFiles: FileWithPath[]) => void 
   const { getRootProps, getInputProps } = useDropzone({ onDrop, accept });
 
   return (
-    <IconButton
-      color="primary"
-      {...getRootProps()}
-      sx={{
-        width: 200,
-        //border: "1px dashed white",
-        borderRadius: 5,
-      }}
-    >
-      <input {...getInputProps()} />
-      <InsertDriveFileOutlinedIcon /> <Typography>Seleccionar imagen</Typography>
-    </IconButton>
+    <ButtonTooltip title="Subir Imagen">
+      <IconButton {...getRootProps()} sx={{ width: 54, height: 54 }}>
+        <input {...getInputProps()} />
+        <UploadFile sx={{ color: "white" }} />
+      </IconButton>
+    </ButtonTooltip>
   );
 }
