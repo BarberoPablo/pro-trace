@@ -1,19 +1,20 @@
 import radiografia from "@/assets/radiografia.png";
 import { Circle, ColorLens, CreateRounded, Delete, Square } from "@mui/icons-material";
-import { Box, Container, Stack } from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
-import ButtonTooltip from "./components/ButtonTooltip";
 import * as React from "react";
+import ButtonTooltip from "./components/ButtonTooltip";
 
 //import * as fabric from "fabric";
 
 const initialColor = "#CB66F0";
+
 export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   //const [imageURL, setImageURL] = React.useState<string>(radiografia);
   const { editor, onReady } = useFabricJSEditor();
   const colorInputRef = React.useRef<HTMLInputElement>(null);
   const [strokeColor, setStrokeColor] = React.useState(initialColor);
-  //const [strokeWidth, setStrokeWidth] = React.useState(2);
+  const [strokeWidth, setStrokeWidth] = React.useState(1);
 
   React.useEffect(() => {
     if (editor?.canvas) {
@@ -31,7 +32,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   }, [editor]);
 
   const handleAddSquare = () => {
-    editor?.addText("asd");
+    editor?.addRectangle();
   };
 
   const onAddCircle = () => {
@@ -50,15 +51,17 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  /* React.useEffect(() => {
-    if (editor && strokeColor) {
-      editor.canvas.freeDrawingBrush.color = strokeColor;
-    }
-  }, [strokeColor, editor]); */
-
   const toggleDraw = () => {
     if (editor) {
       editor.canvas.isDrawingMode = !editor.canvas.isDrawingMode;
+    }
+  };
+
+  const handleStrokeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const strokeW = Number(event.target.value);
+    setStrokeWidth(strokeW);
+    if (editor) {
+      editor.canvas.freeDrawingBrush.width = strokeW;
     }
   };
 
@@ -91,10 +94,15 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <CreateRounded />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Colocar círculo" handler={() => editor?.zoomIn()} /* style={{ backgroundColor: strokeColor }} */>
+            <Stack>
+              <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
+              <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
+            </Stack>
+
+            <ButtonTooltip title="Acercar" handler={() => editor?.zoomIn()} /* style={{ backgroundColor: strokeColor }} */>
               IN
             </ButtonTooltip>
-            <ButtonTooltip title="Colocar círculo" handler={() => editor?.zoomOut()} /* style={{ backgroundColor: strokeColor }} */>
+            <ButtonTooltip title="Alejar" handler={() => editor?.zoomOut()} /* style={{ backgroundColor: strokeColor }} */>
               OUT
             </ButtonTooltip>
 
@@ -102,7 +110,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <Circle />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Colocar cuadrado" handler={handleAddSquare} /* style={{ backgroundColor: strokeColor }} */>
+            <ButtonTooltip title="Colocar rectángulo" handler={handleAddSquare} /* style={{ backgroundColor: strokeColor }} */>
               <Square />
             </ButtonTooltip>
 
