@@ -32,11 +32,17 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   }, [editor]);
 
   const handleAddSquare = () => {
-    editor?.addRectangle();
+    if (editor) {
+      editor.addRectangle();
+      editor.canvas.isDrawingMode = false;
+    }
   };
 
   const onAddCircle = () => {
-    editor?.addCircle();
+    if (editor) {
+      editor.addCircle();
+      editor.canvas.isDrawingMode = false;
+    }
   };
 
   const handleColorButtonClick = () => {
