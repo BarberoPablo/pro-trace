@@ -1,5 +1,5 @@
 import { NativeMouseEvent } from "@/utils/types";
-import { CloudDownload, ColorLens, Delete, RedoRounded, UndoRounded } from "@mui/icons-material";
+import { CloudDownload, ColorLens, Delete, Square, RedoRounded, UndoRounded } from "@mui/icons-material";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import React from "react";
 import ImageLoader from "../ImageLoader";
@@ -17,9 +17,6 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
   const [textPosition, setTextPosition] = React.useState({ x: 0, y: 0 });
   const [history, setHistory] = React.useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = React.useState(-1);
-
-  console.log(historyIndex);
-  console.log(history.length);
 
   React.useEffect(() => {
     if (imageUrl) {
@@ -63,17 +60,20 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
   };
 
   const startDrawing = ({ nativeEvent }: NativeMouseEvent) => {
-    const { offsetX, offsetY } = nativeEvent;
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (ctx) {
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = strokeWidth;
-      ctx.beginPath();
-      ctx.moveTo(offsetX, offsetY);
-      ctx.lineJoin = "round"; // Hace que las intersecciones de líneas sean redondeadas
-      ctx.lineCap = "round"; // Hace que el extremo de las líneas sea redondeado
-      setIsDrawing(true);
+    if (nativeEvent.button === 0) {
+      //Left click
+      const { offsetX, offsetY } = nativeEvent;
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (ctx) {
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY);
+        ctx.lineJoin = "round"; // Hace que las intersecciones de líneas sean redondeadas
+        ctx.lineCap = "round"; // Hace que el extremo de las líneas sea redondeado
+        setIsDrawing(true);
+      }
     }
   };
 
@@ -89,8 +89,10 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
   };
 
   const finishDrawing = () => {
-    setIsDrawing(false);
-    saveState();
+    if (isDrawing) {
+      setIsDrawing(false);
+      saveState();
+    }
   };
 
   const handleChangeColor = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,6 +180,10 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
     }
   };
 
+  const handleDrawShape = (shape: string) => {
+    console.log(shape);
+  };
+
   return (
     <Box>
       <Stack sx={{ alignItems: "center", gap: 2 }}>
@@ -187,7 +193,7 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
           >
             <ImageLoader setImage={setImageUrl} />
 
-            <ButtonTooltip title="Cambiar color de trazo" handler={handleColorButtonClick} style={{ backgroundColor: strokeColor }}>
+            <ButtonTooltip title="Cambiar color de trazo" handler={handleColorButtonClick} style={{ backgroundColor: strokeColor }} disabled={!imageUrl}>
               <ColorLens />
             </ButtonTooltip>
 
@@ -210,19 +216,23 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
               <input type="range" min={1} max={50} value={strokeWidth} onChange={handleChangeWidth} />
             </Stack>
 
-            <ButtonTooltip title="Eliminar trazos" handler={handleClearCanvas}>
+            <ButtonTooltip title="Eliminar trazos" handler={handleClearCanvas} disabled={!imageUrl}>
               <Delete />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Descargar Imagen" handler={handleExportPNG}>
+            <ButtonTooltip title="Eliminar trazos" handler={() => handleDrawShape("square")} disabled={!imageUrl}>
+              <Square />
+            </ButtonTooltip>
+
+            <ButtonTooltip title="Descargar Imagen" handler={handleExportPNG} disabled={!imageUrl}>
               <CloudDownload />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Deshacer" handler={handleUndo}>
+            <ButtonTooltip title="Deshacer" handler={handleUndo} disabled={!imageUrl || historyIndex === 0}>
               <UndoRounded />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Rehacer" handler={handleRedo}>
+            <ButtonTooltip title="Rehacer" handler={handleRedo} disabled={!imageUrl || historyIndex >= history.length - 1}>
               <RedoRounded />
             </ButtonTooltip>
           </Stack>
@@ -237,7 +247,7 @@ export default function DrawingCanvas(/* { imageUrl }: { imageUrl: string } */) 
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={finishDrawing}
-              //onMouseOut={finishDrawing}
+              onMouseOut={finishDrawing}
             />
           )}
         </Container>
