@@ -50,10 +50,22 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   };
 
   const handleChangeColor = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setStrokeColor(event.target.value);
+    const newColor = event.target.value;
+    setStrokeColor(newColor);
 
     if (editor) {
-      editor.canvas.freeDrawingBrush.color = event.target.value;
+      editor.canvas.freeDrawingBrush.color = newColor;
+      const selectedObject = editor.canvas.getActiveObject();
+
+      if (selectedObject) {
+        if (selectedObject.type === "rect" || selectedObject.type === "circle") {
+          selectedObject.set("stroke", newColor);
+          //selectedObject.set("fill", newColor);
+        } else if (selectedObject.type === "line" || selectedObject.type === "path" || selectedObject.type === "polygon") {
+          selectedObject.set("stroke", newColor);
+        }
+        editor.canvas.renderAll();
+      }
     }
   };
 
