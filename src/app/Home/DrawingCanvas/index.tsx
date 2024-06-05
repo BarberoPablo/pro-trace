@@ -31,6 +31,40 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   }, [editor]);
 
+  React.useEffect(() => {
+    console.log("@");
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "z") {
+        console.log("atras");
+      }
+      if (event.ctrlKey && event.key === "y") {
+        console.log("adelante");
+      }
+      if (event.key === "Delete") {
+        editor?.deleteSelected();
+      }
+    };
+
+    const handlePathCreated = () => {
+      if (editor && editor.canvas.isDrawingMode) {
+        console.log("save");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    if (editor?.canvas) {
+      editor.canvas.on("path:created", handlePathCreated);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (editor?.canvas) {
+        editor.canvas.off("path:created", handlePathCreated);
+      }
+    };
+  }, [editor]);
+
   const handleAddSquare = () => {
     if (editor) {
       editor.addRectangle();
