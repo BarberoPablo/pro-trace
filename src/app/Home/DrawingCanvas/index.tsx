@@ -1,5 +1,18 @@
 import radiografia from "@/assets/radiografia.png";
-import { Circle, ColorLens, CreateRounded, Delete, Square } from "@mui/icons-material";
+import { modes, themePallet } from "@/utils/constants";
+import {
+  Circle,
+  ColorLens,
+  CreateRounded,
+  Delete,
+  FormatColorFillRounded,
+  Interests,
+  RedoRounded,
+  Square,
+  UndoRounded,
+  ZoomIn,
+  ZoomOut,
+} from "@mui/icons-material";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 import * as React from "react";
@@ -8,6 +21,20 @@ import ButtonTooltip from "./components/ButtonTooltip";
 //import * as fabric from "fabric";
 
 const initialColor = "#CB66F0";
+const floatigBoxStyles = {
+  position: "absolute",
+  borderRadius: 2,
+  border: `2px solid ${themePallet.BLACK}`,
+  px: 2,
+  gap: 2,
+  top: 100,
+  left: 0,
+  py: 1,
+  zIndex: 2,
+  width: 200,
+  bgcolor: "light",
+  opacity: 0.9,
+};
 
 export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   //const [imageURL, setImageURL] = React.useState<string>(radiografia);
@@ -18,6 +45,8 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   const [history, setHistory] = React.useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = React.useState<number>(-1);
   const [isCanvasReady, setIsCanvasReady] = React.useState<boolean>(false);
+  const [selectedMode, setSelectedMode] = React.useState<string>("");
+  const [activeShape, setActiveShape] = React.useState<string>("");
 
   React.useEffect(() => {
     if (editor?.canvas) {
@@ -114,10 +143,40 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     };
   }, [editor, saveHistory, handleRedo, handleUndo]);
 
-  const handleAddSquare = () => {
+  const getLastObject = () => {
+    if (editor) {
+      const canvas = editor.canvas;
+      const objects = canvas.getObjects();
+
+      if (objects.length > 0) {
+        const lastObject = objects[objects.length - 1];
+        return lastObject;
+      }
+    }
+
+    return null;
+  };
+
+  const handleAddRectangle = (/* width, height, grosor etc, capaz q width y height no */) => {
     if (editor) {
       editor.addRectangle();
       editor.canvas.isDrawingMode = false;
+      const lastObjectInCanvas = getLastObject();
+
+      if (lastObjectInCanvas) {
+        lastObjectInCanvas.set({
+          width: 400,
+          height: 400,
+          left: editor.canvas.getWidth() / 2 - 200,
+          top: 100,
+          stroke: strokeColor,
+          strokeWidth: strokeWidth,
+        });
+      }
+      editor.canvas.setActiveObject(lastObjectInCanvas);
+      setActiveShape(lastObjectInCanvas);
+      lastObjectInCanvas.setCoords();
+      saveHistory();
     }
   };
 
@@ -144,7 +203,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       if (selectedObject) {
         if (selectedObject.type === "rect" || selectedObject.type === "circle") {
           selectedObject.set("stroke", newColor);
-          //selectedObject.set("fill", newColor);
         } else if (selectedObject.type === "line" || selectedObject.type === "path" || selectedObject.type === "polygon") {
           selectedObject.set("stroke", newColor);
         }
@@ -156,6 +214,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   const toggleDraw = () => {
     if (editor) {
       editor.canvas.isDrawingMode = !editor.canvas.isDrawingMode;
+      setSelectedMode((prevState) => (prevState === "stroke" ? "select" : "stroke"));
     }
   };
 
@@ -167,15 +226,28 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
+  const handleFillActiveShape = () => {};
+
   return (
     <Box>
       <Stack sx={{ alignItems: "center", gap: 2 }}>
-        <Container sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <Container sx={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <Stack
-            sx={{ position: "sticky", top: 0, zIndex: 1, flexDirection: "row", gap: 5, px: 10, py: 1, my: 2, backgroundColor: "light", borderRadius: 10 }}
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 1,
+              flexDirection: "row",
+              gap: 5,
+              px: 10,
+              py: 1,
+              my: 2,
+              backgroundColor: "light",
+              borderRadius: 10,
+            }}
           >
             <ButtonTooltip title="Cambiar color" handler={handleColorButtonClick} style={{ backgroundColor: strokeColor }}>
-              <ColorLens />
+              <ColorLens sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
             <input
@@ -193,41 +265,82 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             />
 
             <ButtonTooltip title="Deshacer" handler={handleUndo}>
-              Undo
+              <UndoRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
             <ButtonTooltip title="Rehacer" handler={handleRedo}>
-              Redo
+              <RedoRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
             <ButtonTooltip title="Dibujar" handler={toggleDraw}>
-              <CreateRounded />
+              <CreateRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <Stack>
-              <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
-              <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
-            </Stack>
+            {/* <Stack>
+                <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
+                <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
+              </Stack> */}
 
             <ButtonTooltip title="Acercar" handler={() => editor?.zoomIn()} /* style={{ backgroundColor: strokeColor }} */>
-              IN
+              <ZoomIn sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
             <ButtonTooltip title="Alejar" handler={() => editor?.zoomOut()} /* style={{ backgroundColor: strokeColor }} */>
-              OUT
+              <ZoomOut sx={{ width: "100%", height: "100%" }} />
+            </ButtonTooltip>
+
+            <ButtonTooltip
+              title="Abrir menu de figuras geométricas"
+              handler={() => setSelectedMode("shapes")} /* style={{ backgroundColor: strokeColor }} */
+            >
+              <Interests sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
             <ButtonTooltip title="Colocar círculo" handler={handleAddCircle} /* style={{ backgroundColor: strokeColor }} */>
-              <Circle />
+              <Circle sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Colocar rectángulo" handler={handleAddSquare} /* style={{ backgroundColor: strokeColor }} */>
-              <Square />
+            <ButtonTooltip title="Colocar rectángulo" handler={handleAddRectangle} /* style={{ backgroundColor: strokeColor }} */>
+              <Square sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
             <ButtonTooltip title="Eliminar selección" handler={() => editor?.deleteSelected()}>
-              <Delete />
+              <Delete sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
           </Stack>
+
+          {modes.includes(selectedMode) && (
+            <Box sx={{}}>
+              <Box
+                sx={{
+                  ...floatigBoxStyles,
+                }}
+              >
+                {selectedMode === "stroke" && (
+                  <Stack>
+                    <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
+                    <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
+                  </Stack>
+                )}
+                {selectedMode === "shapes" && (
+                  <>
+                    asd
+                    <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Figuras disponibles:</Typography>
+                    <ButtonTooltip title="Rectángulo" handler={handleAddRectangle} /* style={{ backgroundColor: strokeColor }} */>
+                      <Square sx={{ width: "100%", height: "100%" }} />
+                    </ButtonTooltip>
+                  </>
+                )}
+              </Box>
+
+              {activeShape && (
+                <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
+                  <ButtonTooltip title="Rellenar figura" handler={handleFillActiveShape} /* style={{ backgroundColor: strokeColor }} */>
+                    <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
+                  </ButtonTooltip>
+                </Box>
+              )}
+            </Box>
+          )}
           <FabricJSCanvas className="sample-canvas" onReady={onReady} />
         </Container>
       </Stack>
