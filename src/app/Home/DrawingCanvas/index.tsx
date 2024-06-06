@@ -46,7 +46,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   const [historyIndex, setHistoryIndex] = React.useState<number>(-1);
   const [isCanvasReady, setIsCanvasReady] = React.useState<boolean>(false);
   const [selectedMode, setSelectedMode] = React.useState<string>("");
-  const [activeShape, setActiveShape] = React.useState<string>("");
+  const [activeShape, setActiveShape] = React.useState<fabric.Object | null>(null);
 
   React.useEffect(() => {
     if (editor?.canvas) {
@@ -125,13 +125,23 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     };
 
     const handleObjectModified = () => {
+      console.log("asd");
       saveHistory();
+    };
+
+    const handleObjectSelected = () => {
+      const canvasObject = editor?.canvas.getActiveObject();
+      if (["rect", "circle"].includes(canvasObject?.type)) {
+        setActiveShape(canvasObject);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     if (editor?.canvas) {
       editor.canvas.on("path:created", onPathCreated);
       editor.canvas.on("object:modified", handleObjectModified);
+      editor.canvas.on("selection:created", handleObjectSelected);
+      editor.canvas.on("selection:updated", handleObjectSelected);
     }
 
     return () => {
@@ -139,6 +149,8 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       if (editor?.canvas) {
         editor.canvas.off("path:created", onPathCreated);
         editor.canvas.off("object:modified", handleObjectModified);
+        editor.canvas.off("selection:created", handleObjectSelected);
+        editor.canvas.off("selection:updated", handleObjectSelected);
       }
     };
   }, [editor, saveHistory, handleRedo, handleUndo]);
@@ -174,7 +186,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
         });
       }
       editor.canvas.setActiveObject(lastObjectInCanvas);
-      setActiveShape(lastObjectInCanvas);
       lastObjectInCanvas.setCoords();
       saveHistory();
     }
@@ -226,7 +237,16 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  const handleFillActiveShape = () => {};
+  const handleFillActiveShape = () => {
+    //The reference to the activeShape is beeing modified, not the actual value
+    if (activeShape) {
+      activeShape.set({
+        fill: strokeColor,
+      });
+      editor?.canvas.renderAll();
+      saveHistory();
+    }
+  };
 
   return (
     <Box>
@@ -323,7 +343,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                 )}
                 {selectedMode === "shapes" && (
                   <>
-                    asd
                     <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Figuras disponibles:</Typography>
                     <ButtonTooltip title="Rectángulo" handler={handleAddRectangle} /* style={{ backgroundColor: strokeColor }} */>
                       <Square sx={{ width: "100%", height: "100%" }} />
@@ -334,6 +353,8 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
 
               {activeShape && (
                 <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
+                  <Typography sx={{ color: "text.primary", fontWeight: 600, mb: 1 }}>Estilos para la figura sleccionada</Typography>
+
                   <ButtonTooltip title="Rellenar figura" handler={handleFillActiveShape} /* style={{ backgroundColor: strokeColor }} */>
                     <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
                   </ButtonTooltip>
