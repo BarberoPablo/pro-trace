@@ -58,13 +58,31 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   }, [editor, historyIndex]);
 
+  const handleUndo = React.useCallback(() => {
+    if (historyIndex > 0) {
+      editor?.canvas.loadFromJSON(history[historyIndex - 1], () => {
+        editor?.canvas.renderAll();
+        setHistoryIndex((prevIndex) => prevIndex - 1);
+      });
+    }
+  }, [editor?.canvas, history, historyIndex]);
+
+  const handleRedo = React.useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      editor?.canvas.loadFromJSON(history[historyIndex + 1], () => {
+        editor?.canvas.renderAll();
+        setHistoryIndex((prevIndex) => prevIndex + 1);
+      });
+    }
+  }, [editor?.canvas, history, historyIndex]);
+
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "z") {
-        console.log("atras");
+        handleUndo();
       }
       if (event.ctrlKey && event.key === "y") {
-        console.log("adelante");
+        handleRedo();
       }
       if (event.key === "Delete") {
         editor?.deleteSelected();
@@ -94,32 +112,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
         editor.canvas.off("object:modified", handleObjectModified);
       }
     };
-  }, [editor, saveHistory]);
-
-  // Modificar otras funciones que realizan cambios en el lienzo de manera similar
-
-  const handleUndo = () => {
-    if (historyIndex > 0) {
-      let hIndex = 0;
-      setHistoryIndex((prevIndex) => {
-        hIndex = prevIndex;
-        return prevIndex - 1;
-      });
-      editor?.canvas.loadFromJSON(history[hIndex - 1], () => {
-        editor?.canvas.renderAll();
-        //setHistoryIndex((prevIndex) => prevIndex - 1);
-      });
-    }
-  };
-
-  const handleRedo = () => {
-    if (historyIndex < history.length - 1) {
-      editor?.canvas.loadFromJSON(history[historyIndex + 1], () => {
-        editor?.canvas.renderAll();
-        setHistoryIndex((prevIndex) => prevIndex + 1);
-      });
-    }
-  };
+  }, [editor, saveHistory, handleRedo, handleUndo]);
 
   const handleAddSquare = () => {
     if (editor) {
