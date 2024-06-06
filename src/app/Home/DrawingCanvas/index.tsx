@@ -1,14 +1,14 @@
 import radiografia from "@/assets/radiografia.png";
 import { modes, themePallet } from "@/utils/constants";
 import {
-  Circle,
   ColorLens,
   CreateRounded,
+  CropDinRounded,
   Delete,
   FormatColorFillRounded,
   Interests,
   RedoRounded,
-  Square,
+  SquareRounded,
   UndoRounded,
   ZoomIn,
   ZoomOut,
@@ -26,12 +26,11 @@ const floatigBoxStyles = {
   borderRadius: 2,
   border: `2px solid ${themePallet.BLACK}`,
   px: 2,
-  gap: 2,
   top: 100,
   left: 0,
   py: 1,
   zIndex: 2,
-  width: 200,
+  width: 210,
   bgcolor: "light",
   opacity: 0.9,
 };
@@ -136,12 +135,17 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       }
     };
 
+    const handleObjectCleared = () => {
+      setActiveShape(null);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     if (editor?.canvas) {
       editor.canvas.on("path:created", onPathCreated);
       editor.canvas.on("object:modified", handleObjectModified);
       editor.canvas.on("selection:created", handleObjectSelected);
       editor.canvas.on("selection:updated", handleObjectSelected);
+      editor.canvas.on("selection:cleared", handleObjectCleared);
     }
 
     return () => {
@@ -151,6 +155,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
         editor.canvas.off("object:modified", handleObjectModified);
         editor.canvas.off("selection:created", handleObjectSelected);
         editor.canvas.off("selection:updated", handleObjectSelected);
+        editor.canvas.off("selection:cleared", handleObjectCleared);
       }
     };
   }, [editor, saveHistory, handleRedo, handleUndo]);
@@ -169,7 +174,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     return null;
   };
 
-  const handleAddRectangle = (/* width, height, grosor etc, capaz q width y height no */) => {
+  const handleAddRectangle = (fill?: string) => {
     if (editor) {
       editor.addRectangle();
       editor.canvas.isDrawingMode = false;
@@ -177,8 +182,9 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
 
       if (lastObjectInCanvas) {
         lastObjectInCanvas.set({
-          width: 400,
-          height: 400,
+          width: 200,
+          height: 200,
+          fill: fill ? strokeColor : "transparent",
           left: editor.canvas.getWidth() / 2 - 200,
           top: 100,
           stroke: strokeColor,
@@ -191,13 +197,13 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  const handleAddCircle = () => {
+  /* const handleAddCircle = () => {
     if (editor) {
       editor.addCircle();
       editor.canvas.isDrawingMode = false;
       saveHistory();
     }
-  };
+  }; */
 
   const handleColorButtonClick = () => {
     colorInputRef.current?.click();
@@ -237,7 +243,29 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  const handleFillActiveShape = () => {
+  const handleUpdateShape = (props: Record<string, string | number>) => {
+    //The reference to the activeShape is beeing modified, not the actual value
+    if (activeShape) {
+      activeShape.set({
+        ...props,
+      });
+      editor?.canvas.renderAll();
+      saveHistory();
+    }
+  };
+
+  const handleUpdateShapeStrokeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //The reference to the activeShape is beeing modified, not the actual value
+    const value = Number(event.target.value);
+    if (activeShape) {
+      activeShape.set({
+        strokeWidth: value,
+      });
+      editor?.canvas.renderAll();
+      saveHistory();
+    }
+  };
+  /* const handleFillActiveShape = () => {
     //The reference to the activeShape is beeing modified, not the actual value
     if (activeShape) {
       activeShape.set({
@@ -246,7 +274,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       editor?.canvas.renderAll();
       saveHistory();
     }
-  };
+  }; */
 
   return (
     <Box>
@@ -315,21 +343,13 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <Interests sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Colocar círculo" handler={handleAddCircle} /* style={{ backgroundColor: strokeColor }} */>
-              <Circle sx={{ width: "100%", height: "100%" }} />
-            </ButtonTooltip>
-
-            <ButtonTooltip title="Colocar rectángulo" handler={handleAddRectangle} /* style={{ backgroundColor: strokeColor }} */>
-              <Square sx={{ width: "100%", height: "100%" }} />
-            </ButtonTooltip>
-
             <ButtonTooltip title="Eliminar selección" handler={() => editor?.deleteSelected()}>
               <Delete sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
           </Stack>
 
           {modes.includes(selectedMode) && (
-            <Box sx={{}}>
+            <Box sx={{ position: "sticky", width: "100%", top: 0, zIndex: 1 }}>
               <Box
                 sx={{
                   ...floatigBoxStyles,
@@ -342,22 +362,49 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                   </Stack>
                 )}
                 {selectedMode === "shapes" && (
-                  <>
+                  <Stack sx={{ gap: 1 }}>
                     <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Figuras disponibles:</Typography>
-                    <ButtonTooltip title="Rectángulo" handler={handleAddRectangle} /* style={{ backgroundColor: strokeColor }} */>
-                      <Square sx={{ width: "100%", height: "100%" }} />
-                    </ButtonTooltip>
-                  </>
+                    <Stack sx={{ gap: 1, flexDirection: "row" }}>
+                      <ButtonTooltip title="Cuadrado hueco" handler={() => handleAddRectangle()}>
+                        <CropDinRounded sx={{ width: "100%", height: "100%" }} />
+                      </ButtonTooltip>
+                      <ButtonTooltip title="Cuadrado lleno" handler={() => handleAddRectangle("fill")}>
+                        <SquareRounded sx={{ width: "100%", height: "100%" }} />
+                      </ButtonTooltip>
+                    </Stack>
+                  </Stack>
                 )}
               </Box>
-
+              <>{console.log("activeShape", activeShape)}</>
+              <>{console.log("activeShape", activeShape?.strokeWidth)}</>
               {activeShape && (
                 <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
-                  <Typography sx={{ color: "text.primary", fontWeight: 600, mb: 1 }}>Estilos para la figura sleccionada</Typography>
+                  <Stack gap={1}>
+                    <Typography sx={{ color: "text.primary", fontWeight: 600, mb: 1 }}>Estilos para la figura sleccionada:</Typography>
 
-                  <ButtonTooltip title="Rellenar figura" handler={handleFillActiveShape} /* style={{ backgroundColor: strokeColor }} */>
-                    <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
-                  </ButtonTooltip>
+                    <Stack>
+                      <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor del borde: {activeShape?.strokeWidth ?? 1}</Typography>
+                      <input type="range" value={activeShape?.strokeWidth} min={1} max={50} onChange={handleUpdateShapeStrokeWidth} />
+                    </Stack>
+                    <Stack>
+                      <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
+                      <input
+                        type="range"
+                        value={activeShape?.opacity}
+                        step={0.1}
+                        min={0}
+                        max={1}
+                        onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
+                      />
+                    </Stack>
+                    <ButtonTooltip
+                      title="Rellenar/Vaciar figura"
+                      handler={() => handleUpdateShape({ fill: activeShape.fill ? "" : strokeColor })} //change strokeColor or not?
+                      //handler={() => handleUpdateShape({ fill: hexToOpacityAndHex(strokeColor, shapeProps.oppacity) })}
+                    >
+                      <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
+                    </ButtonTooltip>
+                  </Stack>
                 </Box>
               )}
             </Box>
