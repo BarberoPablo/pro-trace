@@ -280,7 +280,9 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
 
     const handleObjectSelected = () => {
       const canvasObject = editor?.canvas.getActiveObject();
-      if (["rect", "circle"].includes(canvasObject?.type)) {
+      console.log(canvasObject?.type);
+      console.log(canvasObject);
+      if (["rect", "circle", "path"].includes(canvasObject?.type)) {
         setActiveShape(canvasObject);
       }
     };
@@ -409,37 +411,38 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                   </Stack>
                 )}
               </Box>
-              {activeShape && (
-                <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
-                  <Stack gap={1}>
-                    <Typography sx={{ color: "text.primary", fontWeight: 600, mb: 1 }}>Estilos para la figura sleccionada:</Typography>
+            </Box>
+          )}
+          <>{console.log(activeShape)}</>
+          {activeShape && (
+            <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
+              <Stack gap={1}>
+                <Typography sx={{ color: "text.primary", fontWeight: 600, mb: 1 }}>Estilos para la figura sleccionada:</Typography>
 
-                    <Stack>
-                      <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor del borde: {activeShape?.strokeWidth ?? 1}</Typography>
-                      <input type="range" value={activeShape?.strokeWidth} min={1} max={50} onChange={handleUpdateShapeStrokeWidth} />
-                    </Stack>
-                    <Stack>
-                      <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
-                      <input
-                        type="range"
-                        value={activeShape?.opacity}
-                        step={0.1}
-                        min={0}
-                        max={1}
-                        onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
-                      />
-                    </Stack>
+                <Stack>
+                  <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor: {activeShape?.strokeWidth ?? 1}</Typography>
+                  <input type="range" value={activeShape?.strokeWidth} min={1} max={50} onChange={handleUpdateShapeStrokeWidth} />
+                </Stack>
+                <Stack>
+                  <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
+                  <input
+                    type="range"
+                    value={activeShape?.opacity}
+                    step={0.1}
+                    min={0}
+                    max={1}
+                    onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
+                  />
+                </Stack>
 
-                    <ButtonTooltip
-                      title="Rellenar/Vaciar figura"
-                      handler={() => handleUpdateShape({ fill: activeShape.fill === "transparent" ? strokeColor : "transparent" })} //change strokeColor or not?
-                      //handler={() => handleUpdateShape({ fill: hexToOpacityAndHex(strokeColor, shapeProps.oppacity) })}
-                    >
-                      <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
-                    </ButtonTooltip>
-                  </Stack>
-                </Box>
-              )}
+                <ButtonTooltip
+                  title="Rellenar/Vaciar figura"
+                  handler={() => handleUpdateShape({ fill: activeShape.fill === "transparent" ? strokeColor : "transparent" })} //change strokeColor or not?
+                  //handler={() => handleUpdateShape({ fill: hexToOpacityAndHex(strokeColor, shapeProps.oppacity) })}
+                >
+                  <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
+                </ButtonTooltip>
+              </Stack>
             </Box>
           )}
           <FabricJSCanvas className="sample-canvas" onReady={onReady} />
