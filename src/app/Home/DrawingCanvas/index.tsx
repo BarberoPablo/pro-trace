@@ -1,6 +1,8 @@
 import radiografia from "@/assets/radiografia.png";
 import { modes, themePallet } from "@/utils/constants";
 import {
+  Circle,
+  CircleOutlined,
   ColorLens,
   CreateRounded,
   CropDinRounded,
@@ -197,13 +199,29 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  /* const handleAddCircle = () => {
+  const handleAddCircle = (fill?: string) => {
     if (editor) {
       editor.addCircle();
       editor.canvas.isDrawingMode = false;
+      const lastObjectInCanvas = getLastObject();
+
+      if (lastObjectInCanvas) {
+        lastObjectInCanvas.set({
+          radius: 100,
+          width: 200,
+          height: 200,
+          fill: fill ? strokeColor : "transparent",
+          left: editor.canvas.getWidth() / 2 - 200,
+          top: 100,
+          stroke: strokeColor,
+          strokeWidth: strokeWidth,
+        });
+      }
+      editor.canvas.setActiveObject(lastObjectInCanvas);
+      lastObjectInCanvas.setCoords();
       saveHistory();
     }
-  }; */
+  };
 
   const handleColorButtonClick = () => {
     colorInputRef.current?.click();
@@ -372,6 +390,14 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                         <SquareRounded sx={{ width: "100%", height: "100%" }} />
                       </ButtonTooltip>
                     </Stack>
+                    <Stack sx={{ gap: 1, flexDirection: "row" }}>
+                      <ButtonTooltip title="Cirulo hueco" handler={() => handleAddCircle()}>
+                        <CircleOutlined sx={{ width: "100%", height: "100%" }} />
+                      </ButtonTooltip>
+                      <ButtonTooltip title="Circulo lleno" handler={() => handleAddCircle("fill")}>
+                        <Circle sx={{ width: "100%", height: "100%" }} />
+                      </ButtonTooltip>
+                    </Stack>
                   </Stack>
                 )}
               </Box>
@@ -397,9 +423,10 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                         onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
                       />
                     </Stack>
+
                     <ButtonTooltip
                       title="Rellenar/Vaciar figura"
-                      handler={() => handleUpdateShape({ fill: activeShape.fill ? "" : strokeColor })} //change strokeColor or not?
+                      handler={() => handleUpdateShape({ fill: activeShape.fill === "transparent" ? strokeColor : "transparent" })} //change strokeColor or not?
                       //handler={() => handleUpdateShape({ fill: hexToOpacityAndHex(strokeColor, shapeProps.oppacity) })}
                     >
                       <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />
