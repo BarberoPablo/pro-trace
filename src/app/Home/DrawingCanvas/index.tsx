@@ -106,61 +106,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   }, [editor?.canvas, history, historyIndex]);
 
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === "z") {
-        handleUndo();
-      }
-      if (event.ctrlKey && event.key === "y") {
-        handleRedo();
-      }
-      if (event.key === "Delete") {
-        editor?.deleteSelected();
-      }
-    };
-
-    const onPathCreated = () => {
-      if (editor && editor.canvas.isDrawingMode) {
-        saveHistory();
-      }
-    };
-
-    const handleObjectModified = () => {
-      saveHistory();
-    };
-
-    const handleObjectSelected = () => {
-      const canvasObject = editor?.canvas.getActiveObject();
-      if (["rect", "circle"].includes(canvasObject?.type)) {
-        setActiveShape(canvasObject);
-      }
-    };
-
-    const handleObjectCleared = () => {
-      setActiveShape(null);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    if (editor?.canvas) {
-      editor.canvas.on("path:created", onPathCreated);
-      editor.canvas.on("object:modified", handleObjectModified);
-      editor.canvas.on("selection:created", handleObjectSelected);
-      editor.canvas.on("selection:updated", handleObjectSelected);
-      editor.canvas.on("selection:cleared", handleObjectCleared);
-    }
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      if (editor?.canvas) {
-        editor.canvas.off("path:created", onPathCreated);
-        editor.canvas.off("object:modified", handleObjectModified);
-        editor.canvas.off("selection:created", handleObjectSelected);
-        editor.canvas.off("selection:updated", handleObjectSelected);
-        editor.canvas.off("selection:cleared", handleObjectCleared);
-      }
-    };
-  }, [editor, saveHistory, handleRedo, handleUndo]);
-
   const getLastObject = () => {
     if (editor) {
       const canvas = editor.canvas;
@@ -260,6 +205,16 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
+  const handleDeleteSelected = React.useCallback(() => {
+    if (editor) {
+      const activeSelection = editor.canvas.getActiveObject();
+      if (activeSelection) {
+        editor?.deleteSelected();
+        saveHistory();
+      }
+    }
+  }, [editor, saveHistory]);
+
   const handleStrokeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
     const strokeW = Number(event.target.value);
     setStrokeWidth(strokeW);
@@ -290,6 +245,61 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       saveHistory();
     }
   };
+
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "z") {
+        handleUndo();
+      }
+      if (event.ctrlKey && event.key === "y") {
+        handleRedo();
+      }
+      if (event.key === "Delete") {
+        handleDeleteSelected();
+      }
+    };
+
+    const onPathCreated = () => {
+      if (editor && editor.canvas.isDrawingMode) {
+        saveHistory();
+      }
+    };
+
+    const handleObjectModified = () => {
+      saveHistory();
+    };
+
+    const handleObjectSelected = () => {
+      const canvasObject = editor?.canvas.getActiveObject();
+      if (["rect", "circle"].includes(canvasObject?.type)) {
+        setActiveShape(canvasObject);
+      }
+    };
+
+    const handleObjectCleared = () => {
+      setActiveShape(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    if (editor?.canvas) {
+      editor.canvas.on("path:created", onPathCreated);
+      editor.canvas.on("object:modified", handleObjectModified);
+      editor.canvas.on("selection:created", handleObjectSelected);
+      editor.canvas.on("selection:updated", handleObjectSelected);
+      editor.canvas.on("selection:cleared", handleObjectCleared);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (editor?.canvas) {
+        editor.canvas.off("path:created", onPathCreated);
+        editor.canvas.off("object:modified", handleObjectModified);
+        editor.canvas.off("selection:created", handleObjectSelected);
+        editor.canvas.off("selection:updated", handleObjectSelected);
+        editor.canvas.off("selection:cleared", handleObjectCleared);
+      }
+    };
+  }, [editor, saveHistory, handleRedo, handleUndo, handleDeleteSelected]);
 
   return (
     <Box>
@@ -332,7 +342,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <Interests sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Eliminar selección" handler={() => editor?.deleteSelected()}>
+            <ButtonTooltip title="Eliminar selección" handler={handleDeleteSelected}>
               <Delete sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
           </Stack>
