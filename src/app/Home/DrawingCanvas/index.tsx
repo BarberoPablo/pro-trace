@@ -312,24 +312,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               borderRadius: 10,
             }}
           >
-            <ButtonTooltip title="Cambiar color" handler={handleColorButtonClick} style={{ backgroundColor: strokeColor }}>
-              <ColorLens sx={{ width: "100%", height: "100%" }} />
-            </ButtonTooltip>
-
-            <input
-              ref={colorInputRef}
-              type="color"
-              value={strokeColor}
-              onChange={handleChangeColor}
-              style={{
-                position: "absolute",
-                width: 0,
-                height: 0,
-                opacity: 0,
-                left: 150,
-              }}
-            />
-
             <ButtonTooltip title="Deshacer" handler={handleUndo}>
               <UndoRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
@@ -341,11 +323,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             <ButtonTooltip title="Dibujar" handler={toggleDraw}>
               <CreateRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
-
-            {/* <Stack>
-                <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
-                <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
-              </Stack> */}
 
             <ButtonTooltip title="Acercar" handler={() => editor?.zoomIn()} /* style={{ backgroundColor: strokeColor }} */>
               <ZoomIn sx={{ width: "100%", height: "100%" }} />
@@ -375,8 +352,26 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               >
                 {selectedMode === "stroke" && (
                   <Stack>
-                    <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
-                    <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
+                    <Stack>
+                      <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
+                      <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
+                    </Stack>
+                    <ButtonTooltip title="Cambiar color" handler={handleColorButtonClick} style={{ backgroundColor: strokeColor }}>
+                      <ColorLens sx={{ width: "100%", height: "100%" }} />
+                    </ButtonTooltip>
+                    <input
+                      ref={colorInputRef}
+                      type="color"
+                      value={strokeColor}
+                      onChange={handleChangeColor}
+                      style={{
+                        position: "absolute",
+                        width: 0,
+                        height: 0,
+                        opacity: 0,
+                        left: 100,
+                      }}
+                    />
                   </Stack>
                 )}
                 {selectedMode === "shapes" && (
