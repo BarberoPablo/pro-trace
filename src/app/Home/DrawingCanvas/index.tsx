@@ -167,7 +167,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
 
   const handleChangeColor = (event: React.ChangeEvent<HTMLInputElement>, prop: string) => {
     const newColor = event.target.value;
-    console.log(prop);
     setColor((prevState) => ({
       ...prevState,
       [prop]: newColor,
@@ -187,8 +186,10 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   const toggleDraw = () => {
     if (editor) {
       setActiveShape(null);
-      editor.canvas.isDrawingMode = selectedMode !== "stroke" ? true : false;
       setSelectedMode((prevState) => (prevState !== "stroke" ? "stroke" : "select"));
+      editor.canvas.isDrawingMode = selectedMode !== "stroke" ? true : false;
+      editor.canvas.discardActiveObject();
+      editor.canvas.requestRenderAll();
     }
   };
 
@@ -353,7 +354,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                     </Stack>
                     <ButtonTooltip title="Cambiar color" handler={handleStrokeColorButtonClick} style={{ backgroundColor: color.stroke }}>
                       <ColorLens sx={{ width: "100%", height: "100%" }} />
-                      delete this
                     </ButtonTooltip>
                     <input
                       ref={strokeColorInputRef}
