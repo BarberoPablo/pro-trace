@@ -46,7 +46,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   const [history, setHistory] = React.useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = React.useState<number>(-1);
   const [isCanvasReady, setIsCanvasReady] = React.useState<boolean>(false);
-  const [selectedMode, setSelectedMode] = React.useState<string>("");
+  const [selectedMode, setSelectedMode] = React.useState<string>("select");
   const [activeShape, setActiveShape] = React.useState<fabric.Object | null>(null);
 
   React.useEffect(() => {
@@ -126,7 +126,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     };
 
     const handleObjectModified = () => {
-      console.log("asd");
       saveHistory();
     };
 
@@ -248,8 +247,16 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
 
   const toggleDraw = () => {
     if (editor) {
-      editor.canvas.isDrawingMode = !editor.canvas.isDrawingMode;
-      setSelectedMode((prevState) => (prevState === "stroke" ? "select" : "stroke"));
+      setActiveShape(null);
+      editor.canvas.isDrawingMode = selectedMode !== "stroke" ? true : false;
+      setSelectedMode((prevState) => (prevState !== "stroke" ? "stroke" : "select"));
+    }
+  };
+
+  const toggleShapes = () => {
+    if (editor) {
+      editor.canvas.isDrawingMode = false;
+      setSelectedMode((prevState) => (prevState !== "shapes" ? "shapes" : "select"));
     }
   };
 
@@ -283,16 +290,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       saveHistory();
     }
   };
-  /* const handleFillActiveShape = () => {
-    //The reference to the activeShape is beeing modified, not the actual value
-    if (activeShape) {
-      activeShape.set({
-        fill: strokeColor,
-      });
-      editor?.canvas.renderAll();
-      saveHistory();
-    }
-  }; */
 
   return (
     <Box>
@@ -320,7 +317,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <RedoRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Dibujar" handler={toggleDraw}>
+            <ButtonTooltip title="Dibujar" handler={toggleDraw} active={selectedMode === "stroke"}>
               <CreateRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
@@ -331,10 +328,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <ZoomOut sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip
-              title="Abrir menu de figuras geométricas"
-              handler={() => setSelectedMode("shapes")} /* style={{ backgroundColor: strokeColor }} */
-            >
+            <ButtonTooltip title="Abrir menu de figuras geométricas" handler={toggleShapes} active={selectedMode === "shapes"}>
               <Interests sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
@@ -396,8 +390,6 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                   </Stack>
                 )}
               </Box>
-              <>{console.log("activeShape", activeShape)}</>
-              <>{console.log("activeShape", activeShape?.strokeWidth)}</>
               {activeShape && (
                 <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
                   <Stack gap={1}>

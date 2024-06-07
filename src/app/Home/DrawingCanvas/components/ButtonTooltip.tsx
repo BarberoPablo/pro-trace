@@ -5,12 +5,14 @@ export default function ButtonTooltip({
   title,
   handler,
   disabled = false,
+  active,
   style,
   children,
 }: {
   title: string;
   handler?: () => void;
   disabled?: boolean;
+  active?: boolean;
   style?: Record<string, string | number>;
   children: React.ReactNode;
 }) {
@@ -29,7 +31,11 @@ export default function ButtonTooltip({
         },
       }}
     >
-      <IconButton disabled={disabled} onClick={handler} sx={{ width: 54, height: 54, backgroundColor: "dark", color: "white", ...style }}>
+      <IconButton
+        disabled={disabled}
+        onClick={handler}
+        sx={{ width: 54, height: 54, backgroundColor: active ? "black" : "dark", color: "white", ...style }}
+      >
         {children}
       </IconButton>
     </Tooltip>
