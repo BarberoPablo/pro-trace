@@ -257,6 +257,15 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
       if (event.key === "Delete") {
         handleDeleteSelected();
       }
+      if (event.key === "Escape") {
+        setActiveShape(null);
+        setSelectedMode("select");
+        if (editor) {
+          editor.canvas.isDrawingMode = false;
+          editor.canvas.discardActiveObject();
+          editor.canvas.requestRenderAll();
+        }
+      }
     };
 
     const onPathCreated = () => {
