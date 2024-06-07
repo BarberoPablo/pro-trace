@@ -6,6 +6,7 @@ export default function ButtonTooltip({
   handler,
   disabled = false,
   active,
+  placement = "top",
   style,
   children,
 }: {
@@ -13,13 +14,14 @@ export default function ButtonTooltip({
   handler?: () => void;
   disabled?: boolean;
   active?: boolean;
+  placement?: "top" | "right" | "bottom" | "left";
   style?: Record<string, string | number>;
   children: React.ReactNode;
 }) {
   return (
     <Tooltip
       title={<Typography sx={{ color: "text.primary", fontWeight: 600 }}>{title}</Typography>}
-      placement="top"
+      placement={placement}
       arrow
       sx={{ zIndex: 1 }}
       componentsProps={{
@@ -34,7 +36,7 @@ export default function ButtonTooltip({
       <IconButton
         disabled={disabled}
         onClick={handler}
-        sx={{ width: 54, height: 54, backgroundColor: active ? "green" : "dark", color: "white", ...style }}
+        sx={{ width: 54, height: 54, backgroundColor: active ? "selected" : "dark", color: "white", ...style }}
       >
         {children}
       </IconButton>

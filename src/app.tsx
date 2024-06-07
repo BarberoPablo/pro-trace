@@ -5,7 +5,7 @@ import { Box, IconButton, createTheme, useMediaQuery } from "@mui/material";
 import { amber, blue, grey } from "@mui/material/colors";
 import React from "react";
 import Home from "./app/Home";
-import { themePallet } from "./utils/constants.tsx";
+import { darkThemePallet, lightThemePallet } from "./utils/constants.tsx";
 
 export default function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -17,13 +17,13 @@ export default function App() {
         ? {
             // palette values for dark mode
             primary: blue,
-            black: themePallet.BLACK,
-            green: themePallet.GREEN,
-            light: themePallet.LIGHT,
-            dark: themePallet.DARK,
+            black: darkThemePallet.BLACK,
+            selected: darkThemePallet.SELECTED,
+            light: darkThemePallet.LIGHT,
+            dark: darkThemePallet.DARK,
 
             background: {
-              default: themePallet.DARK,
+              default: darkThemePallet.DARK,
             },
             text: {
               primary: "#000",
@@ -33,35 +33,28 @@ export default function App() {
         : {
             // palette values for light mode
             primary: amber,
-            divider: amber[400],
+            black: lightThemePallet.BLACK,
+            selected: lightThemePallet.SELECTED,
+            light: lightThemePallet.LIGHT,
+            dark: lightThemePallet.DARK,
+
             background: {
-              default: amber[200],
+              default: lightThemePallet.DARK,
             },
             text: {
-              primary: grey[900],
-              secondary: grey[800],
+              primary: "#000",
+              secondary: grey[500],
             },
           }),
     },
-    components: {
-      MuiButton: {
-        defaultProps: {
-          style: {
-            //backgroundColor: mode ? themePallet.LIGHT : themePallet.BLACK,
-            //color: mode ? "black" : "white",
-            //textTransform: "none",
-          },
-        },
+    typography: {
+      fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
+      fontSize: 16,
+      title: {
+        fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
+        fontSize: 18,
+        fontWeight: 600,
       },
-      /* MuiIconButton: {
-        defaultProps: {
-          style: {
-            backgroundColor: mode ? themePallet.LIGHT : themePallet.DARK,
-            color: mode ? "black" : "white",
-            //textTransform: "none",
-          },
-        },
-      }, */
     },
   });
   document.body.style.backgroundColor = appTheme.palette.background.default;
@@ -74,17 +67,14 @@ export default function App() {
     <ThemeProvider theme={appTheme}>
       <Box
         sx={{
-          //backgroundColor: "background.default",
           backgroundSize: "cover",
           display: "flex",
           flexDirection: "column",
-          //minHeight: "100vh",
-          //height: "100%",
         }}
       >
         <IconButton sx={{ width: 32, height: 32 }} onClick={handleChangeTheme} color="inherit">
           {appTheme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-        </IconButton>{" "}
+        </IconButton>
         <Home />
       </Box>
     </ThemeProvider>

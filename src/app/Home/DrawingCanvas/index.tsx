@@ -1,7 +1,7 @@
 import radiografia from "@/assets/radiografia.png";
-import { icons, modes, themePallet } from "@/utils/constants";
+import { icons, modes, darkThemePallet } from "@/utils/constants";
 import { ColorLens, CreateRounded, Delete, Interests, RedoRounded, UndoRounded, ZoomIn, ZoomOut } from "@mui/icons-material";
-import { Box, Container, Divider, Stack, Typography } from "@mui/material";
+import { Box, Container, Divider, Stack, Typography, useTheme } from "@mui/material";
 import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 import * as React from "react";
 import ButtonTooltip from "./components/ButtonTooltip";
@@ -12,10 +12,10 @@ const initialColor = "#CB66F0";
 const floatigBoxStyles = {
   position: "absolute",
   borderRadius: 2,
-  border: `2px solid ${themePallet.BLACK}`,
+  border: `2px solid ${darkThemePallet.BLACK}`,
   px: 2,
   top: 100,
-  left: -100,
+  left: -30,
   py: 1,
   zIndex: 2,
   width: 210,
@@ -24,6 +24,7 @@ const floatigBoxStyles = {
 };
 
 export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
+  const theme = useTheme();
   //const [imageURL, setImageURL] = React.useState<string>(radiografia);
   const { editor, onReady } = useFabricJSEditor();
   const strokeColorInputRef = React.useRef<HTMLInputElement>(null);
@@ -349,8 +350,17 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                 {selectedMode === "stroke" && (
                   <Stack>
                     <Stack>
-                      <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor de línea: {strokeWidth}</Typography>
-                      <input type="range" value={strokeWidth} min={1} max={50} onChange={handleStrokeWidth} />
+                      <Typography>Grosor de línea: {strokeWidth}</Typography>
+                      <input
+                        type="range"
+                        value={strokeWidth}
+                        min={1}
+                        max={50}
+                        style={{
+                          accentColor: theme.palette.selected,
+                        }}
+                        onChange={handleStrokeWidth}
+                      />
                     </Stack>
                     <ButtonTooltip title="Cambiar color" handler={handleStrokeColorButtonClick} style={{ backgroundColor: color.stroke }}>
                       <ColorLens sx={{ width: "100%", height: "100%" }} />
@@ -371,8 +381,8 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                   </Stack>
                 )}
                 {selectedMode === "shapes" && (
-                  <Stack sx={{ gap: 1 }}>
-                    <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Figuras disponibles:</Typography>
+                  <Stack sx={{ rowGap: 2 }}>
+                    <Typography variant="title">Figuras disponibles:</Typography>
                     <Stack sx={{ gap: 1, flexDirection: "row" }}>
                       <ButtonTooltip title="Cuadrado hueco" handler={() => handleAddRectangle()}>
                         {icons.rect.empty}
@@ -395,21 +405,24 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             </Box>
           )}
           {activeShape && activeShape.type && (
-            <Box sx={{ ...floatigBoxStyles, right: floatigBoxStyles.left, left: "auto" }}>
+            <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
               <Stack gap={1}>
                 <Stack>
-                  <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
+                  <Typography>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
                   <input
                     type="range"
                     value={activeShape?.opacity}
                     step={0.1}
                     min={0}
                     max={1}
+                    style={{
+                      accentColor: theme.palette.selected,
+                    }}
                     onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
                   />
                 </Stack>
                 <Divider>
-                  <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Borde</Typography>
+                  <Typography variant="title">BORDE</Typography>
                 </Divider>
 
                 <Stack sx={{ flexDirection: "row", gap: 2 }}>
@@ -430,19 +443,22 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                     }}
                   />
                   <Stack>
-                    <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Grosor: {activeShape?.strokeWidth ?? 1}</Typography>
+                    <Typography>Grosor: {activeShape?.strokeWidth ?? 1}</Typography>
                     <input
                       type="range"
                       value={activeShape?.strokeWidth}
                       min={1}
                       max={50}
+                      style={{
+                        accentColor: theme.palette.selected,
+                      }}
                       onChange={(event) => handleUpdateShape({ strokeWidth: Number(event.target.value) })}
                     />
                   </Stack>
                 </Stack>
 
                 <Divider>
-                  <Typography sx={{ color: "text.primary", fontWeight: 600 }}>Interior</Typography>
+                  <Typography variant="title">INTERIOR</Typography>
                 </Divider>
                 <Stack sx={{ flexDirection: "row", gap: 3 }}>
                   <ButtonTooltip title="Cambiar color del interior" handler={handleFillColorButtonClick} style={{ backgroundColor: color.fill }}>
@@ -465,10 +481,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                     <ButtonTooltip title="Eliminar interior" handler={() => handleUpdateShape({ fill: "transparent" })}>
                       {icons[activeShape.type].empty}
                     </ButtonTooltip>
-                    <ButtonTooltip
-                      title="Rellenar interior"
-                      handler={() => handleUpdateShape({ fill: color.fill })} //change strokeColor or not?
-                    >
+                    <ButtonTooltip title="Rellenar interior" handler={() => handleUpdateShape({ fill: color.fill })}>
                       {icons[activeShape.type].full}
                     </ButtonTooltip>
                   </Stack>
