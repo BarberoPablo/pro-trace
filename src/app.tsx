@@ -5,7 +5,7 @@ import { Box, IconButton, createTheme, useMediaQuery } from "@mui/material";
 import { amber, blue, grey } from "@mui/material/colors";
 import React from "react";
 import Home from "./app/Home";
-import { themePallet } from "./utils/constants";
+import { themePallet } from "./utils/constants.tsx";
 
 export default function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
