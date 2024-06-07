@@ -34,7 +34,7 @@ export default function ButtonTooltip({
       <IconButton
         disabled={disabled}
         onClick={handler}
-        sx={{ width: 54, height: 54, backgroundColor: active ? "black" : "dark", color: "white", ...style }}
+        sx={{ width: 54, height: 54, backgroundColor: active ? "green" : "dark", color: "white", ...style }}
       >
         {children}
       </IconButton>

@@ -319,11 +319,11 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               borderRadius: 10,
             }}
           >
-            <ButtonTooltip title="Deshacer" handler={handleUndo}>
+            <ButtonTooltip title="Deshacer" handler={handleUndo} active={historyIndex > 0}>
               <UndoRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Rehacer" handler={handleRedo}>
+            <ButtonTooltip title="Rehacer" handler={handleRedo} active={historyIndex < history.length - 1}>
               <RedoRounded sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
