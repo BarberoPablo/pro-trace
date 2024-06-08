@@ -1,11 +1,22 @@
 import radiografia from "@/assets/radiografia.png";
 import { icons, modes, darkThemePallet } from "@/utils/constants";
-import { ColorLens, CreateRounded, Delete, Interests, RedoRounded, UndoRounded, ZoomIn, ZoomOut } from "@mui/icons-material";
+import {
+  CloudDownload,
+  ColorLens,
+  CreateRounded,
+  Delete,
+  FormatColorTextRounded,
+  Interests,
+  RedoRounded,
+  UndoRounded,
+  ZoomIn,
+  ZoomOut,
+} from "@mui/icons-material";
 import { Box, Container, Divider, Stack, Typography, useTheme } from "@mui/material";
 import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 import * as React from "react";
 import ButtonTooltip from "./components/ButtonTooltip";
-
+import * as fabric from "fabric";
 //import * as fabric from "fabric";
 
 const initialColor = "#CB66F0";
@@ -211,6 +222,21 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   }, [editor, saveHistory]);
 
+  const handleExportPNG = () => {
+    if (editor) {
+      const canvas = editor.canvas;
+      if (canvas) {
+        const dataURL = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = dataURL;
+        link.download = "canvas.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  };
+
   const handleStrokeWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
     const strokeW = Number(event.target.value);
     setStrokeWidth(strokeW);
@@ -226,6 +252,28 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
         ...props,
       });
       editor?.canvas.renderAll();
+      saveHistory();
+    }
+  };
+
+  const handleAddText = () => {
+    if (editor && editor.canvas) {
+      editor.addText("Escribe aquí");
+      editor.canvas.isDrawingMode = false;
+      const lastObjectInCanvas = getLastObject();
+
+      if (lastObjectInCanvas) {
+        lastObjectInCanvas.set({
+          fontSize: 30,
+
+          left: editor.canvas.getWidth() / 2 - 200,
+          top: 300,
+          //stroke: color.stroke,
+          //strokeWidth: strokeWidth,
+        });
+      }
+      editor.canvas.setActiveObject(lastObjectInCanvas);
+      lastObjectInCanvas.setCoords();
       saveHistory();
     }
   };
@@ -264,7 +312,8 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
 
     const handleObjectSelected = () => {
       const canvasObject = editor?.canvas.getActiveObject();
-      if (["rect", "circle", "path"].includes(canvasObject?.type)) {
+      console.log(canvasObject.type);
+      if (["rect", "circle", "path", "text"].includes(canvasObject?.type)) {
         setActiveShape(canvasObject);
       }
     };
@@ -338,6 +387,14 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             <ButtonTooltip title="Eliminar selección" handler={handleDeleteSelected}>
               <Delete sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
+
+            <ButtonTooltip title="Descargar Imagen" handler={handleExportPNG}>
+              <CloudDownload />
+            </ButtonTooltip>
+
+            <ButtonTooltip title="Agregar Texto" handler={handleAddText}>
+              <FormatColorTextRounded />
+            </ButtonTooltip>
           </Stack>
 
           {modes.includes(selectedMode) && (
@@ -405,88 +462,111 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             </Box>
           )}
           {activeShape && activeShape.type && (
-            <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
-              <Stack gap={1}>
-                <Stack>
-                  <Typography>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
-                  <input
-                    type="range"
-                    value={activeShape?.opacity}
-                    step={0.1}
-                    min={0}
-                    max={1}
-                    style={{
-                      accentColor: theme.palette.selected,
-                    }}
-                    onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
-                  />
-                </Stack>
-                <Divider>
-                  <Typography variant="title">BORDE</Typography>
-                </Divider>
-
-                <Stack sx={{ flexDirection: "row", gap: 2 }}>
-                  <ButtonTooltip title="Cambiar color del borde" handler={handleStrokeColorButtonClick} style={{ backgroundColor: color.stroke }}>
-                    <ColorLens sx={{ width: "100%", height: "100%" }} />
-                  </ButtonTooltip>
-                  <input
-                    ref={strokeColorInputRef}
-                    type="color"
-                    value={color.stroke}
-                    onChange={(event) => handleChangeColor(event, "stroke")}
-                    style={{
-                      position: "absolute",
-                      width: 0,
-                      height: 0,
-                      opacity: 0,
-                      left: 100,
-                    }}
-                  />
+            <Box sx={{ position: "sticky", width: "100%", top: 0, zIndex: 1 }}>
+              <Box sx={{ ...floatigBoxStyles, right: 0, left: "auto" }}>
+                <Stack gap={1} sx={{ position: "sticky" }}>
                   <Stack>
-                    <Typography>Grosor: {activeShape?.strokeWidth ?? 1}</Typography>
+                    <Typography>Opacidad: {(activeShape?.opacity ?? 1) * 100}%</Typography>
                     <input
                       type="range"
-                      value={activeShape?.strokeWidth}
-                      min={1}
-                      max={50}
+                      value={activeShape?.opacity}
+                      step={0.1}
+                      min={0}
+                      max={1}
                       style={{
                         accentColor: theme.palette.selected,
                       }}
-                      onChange={(event) => handleUpdateShape({ strokeWidth: Number(event.target.value) })}
+                      onChange={(event) => handleUpdateShape({ opacity: Number(event.target.value) })}
                     />
                   </Stack>
-                </Stack>
+                  <Divider>
+                    <Typography variant="title">BORDE</Typography>
+                  </Divider>
 
-                <Divider>
-                  <Typography variant="title">INTERIOR</Typography>
-                </Divider>
-                <Stack sx={{ flexDirection: "row", gap: 3 }}>
-                  <ButtonTooltip title="Cambiar color del interior" handler={handleFillColorButtonClick} style={{ backgroundColor: color.fill }}>
-                    <ColorLens sx={{ width: "100%", height: "100%" }} />
-                  </ButtonTooltip>
-                  <input
-                    ref={fillColorInputRef}
-                    type="color"
-                    value={color.fill}
-                    onChange={(event) => handleChangeColor(event, "fill")}
-                    style={{
-                      position: "absolute",
-                      width: 0,
-                      height: 0,
-                      opacity: 0,
-                      left: 100,
-                    }}
-                  />
-                  <Stack sx={{ flexDirection: "row", gap: 1, justifyContent: "center" }}>
-                    <ButtonTooltip title="Eliminar interior" handler={() => handleUpdateShape({ fill: "transparent" })}>
-                      {icons[activeShape.type].empty}
+                  <Stack sx={{ flexDirection: "row", gap: 2 }}>
+                    <ButtonTooltip title="Cambiar color del borde" handler={handleStrokeColorButtonClick} style={{ backgroundColor: color.stroke }}>
+                      <ColorLens sx={{ width: "100%", height: "100%" }} />
                     </ButtonTooltip>
-                    <ButtonTooltip title="Rellenar interior" handler={() => handleUpdateShape({ fill: color.fill })}>
-                      {icons[activeShape.type].full}
-                    </ButtonTooltip>
+                    <input
+                      ref={strokeColorInputRef}
+                      type="color"
+                      value={color.stroke}
+                      onChange={(event) => handleChangeColor(event, "stroke")}
+                      style={{
+                        position: "absolute",
+                        width: 0,
+                        height: 0,
+                        opacity: 0,
+                        left: 100,
+                      }}
+                    />
+                    <Stack>
+                      <Typography>Grosor: {activeShape?.strokeWidth ?? 1}</Typography>
+                      <input
+                        type="range"
+                        value={activeShape?.strokeWidth}
+                        min={1}
+                        max={50}
+                        style={{
+                          accentColor: theme.palette.selected,
+                        }}
+                        onChange={(event) => handleUpdateShape({ strokeWidth: Number(event.target.value) })}
+                      />
+                    </Stack>
                   </Stack>
+
+                  <Divider>
+                    <Typography variant="title">INTERIOR</Typography>
+                  </Divider>
+                  <Stack sx={{ flexDirection: "row", gap: 3 }}>
+                    <ButtonTooltip title="Cambiar color del interior" handler={handleFillColorButtonClick} style={{ backgroundColor: color.fill }}>
+                      <ColorLens sx={{ width: "100%", height: "100%" }} />
+                    </ButtonTooltip>
+                    <input
+                      ref={fillColorInputRef}
+                      type="color"
+                      value={color.fill}
+                      onChange={(event) => handleChangeColor(event, "fill")}
+                      style={{
+                        position: "absolute",
+                        width: 0,
+                        height: 0,
+                        opacity: 0,
+                        left: 100,
+                      }}
+                    />
+                    <Stack sx={{ flexDirection: "row", gap: 1, justifyContent: "center" }}>
+                      <ButtonTooltip title="Eliminar interior" handler={() => handleUpdateShape({ fill: "transparent" })}>
+                        {icons[activeShape.type]?.empty}
+                      </ButtonTooltip>
+                      <ButtonTooltip title="Rellenar interior" handler={() => handleUpdateShape({ fill: color.fill })}>
+                        {icons[activeShape.type]?.full}
+                      </ButtonTooltip>
+                    </Stack>
+                  </Stack>
+
+                  {activeShape.type === "text" && (
+                    <>
+                      <Divider>
+                        <Typography variant="title">TEXTO</Typography>
+                      </Divider>
+                      <Stack>
+                        <Typography>Tamaño: {(activeShape as fabric.Text).fontSize ?? 1}</Typography>
+                        <input
+                          type="range"
+                          value={(activeShape as fabric.Text).fontSize}
+                          min={1}
+                          max={100}
+                          style={{
+                            accentColor: theme.palette.selected,
+                          }}
+                          onChange={(event) => handleUpdateShape({ fontSize: Number(event.target.value) })}
+                        />
+                      </Stack>
+                    </>
+                  )}
                 </Stack>
-              </Stack>
+              </Box>
             </Box>
           )}
           <FabricJSCanvas className="sample-canvas" onReady={onReady} />
