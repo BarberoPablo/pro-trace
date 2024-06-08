@@ -36,6 +36,10 @@ export const icons: { [key: string]: { full: JSX.Element; empty: JSX.Element } }
     full: <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />,
     empty: <ClearRounded sx={{ width: "100%", height: "100%" }} />,
   },
+  text: {
+    full: <FormatColorFillRounded sx={{ width: "100%", height: "100%" }} />,
+    empty: <ClearRounded sx={{ width: "100%", height: "100%" }} />,
+  },
   /* 
   group:{
     full: <></>,
