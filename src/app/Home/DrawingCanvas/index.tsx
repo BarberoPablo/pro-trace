@@ -1,4 +1,3 @@
-import radiografia from "@/assets/body/radiografia.png";
 import prostata from "@/assets/body/prostata.png";
 import { icons, modes, darkThemePallet } from "@/utils/constants";
 import {
@@ -18,9 +17,10 @@ import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
 import * as React from "react";
 import ButtonTooltip from "./components/ButtonTooltip";
 import * as fabric from "fabric";
+import ImageReferences from "./components/ImageReferences";
 //import * as fabric from "fabric";
 
-const initialColor = "#CB66F0";
+const initialColor = "#000";
 const floatigBoxStyles = {
   position: "absolute",
   borderRadius: 2,
@@ -123,19 +123,23 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     return null;
   };
 
-  const handleAddRectangle = (fill?: string) => {
+  const handleAddRectangle = (fill?: boolean, angle?: number) => {
+    console.log(fill);
+    console.log(angle);
     if (editor) {
       editor.addRectangle();
       editor.canvas.isDrawingMode = false;
       const lastObjectInCanvas = getLastObject();
 
       if (lastObjectInCanvas) {
+        const size = 50;
         lastObjectInCanvas.set({
-          width: 200,
-          height: 200,
+          width: size,
+          height: size,
           fill: fill ? color.fill : "transparent",
-          left: editor.canvas.getWidth() / 2 - 200,
+          left: editor.canvas.getWidth() / 2 - size,
           top: 100,
+          angle: angle ?? 0,
           stroke: color.stroke,
           strokeWidth: strokeWidth,
         });
@@ -146,19 +150,21 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
     }
   };
 
-  const handleAddCircle = (fill?: string) => {
+  const handleAddCircle = (fill?: boolean) => {
+    console.log(fill);
     if (editor) {
       editor.addCircle();
       editor.canvas.isDrawingMode = false;
       const lastObjectInCanvas = getLastObject();
 
       if (lastObjectInCanvas) {
+        const diameter = 50;
         lastObjectInCanvas.set({
-          radius: 100,
-          width: 200,
-          height: 200,
+          radius: diameter / 2,
+          width: diameter,
+          height: diameter,
           fill: fill ? color.fill : "transparent",
-          left: editor.canvas.getWidth() / 2 - 200,
+          left: editor.canvas.getWidth() / 2 - diameter,
           top: 100,
           stroke: color.stroke,
           strokeWidth: strokeWidth,
@@ -398,6 +404,8 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             </ButtonTooltip>
           </Stack>
 
+          <ImageReferences bodyPart="prostata" handleData={{ circle: handleAddCircle, rect: handleAddRectangle, rhombus: handleAddRectangle }} />
+
           {modes.includes(selectedMode) && (
             <Box sx={{ position: "sticky", width: "100%", top: 0, zIndex: 1 }}>
               <Box
@@ -445,7 +453,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                       <ButtonTooltip title="Cuadrado hueco" handler={() => handleAddRectangle()}>
                         {icons.rect.empty}
                       </ButtonTooltip>
-                      <ButtonTooltip title="Cuadrado lleno" handler={() => handleAddRectangle("fill")}>
+                      <ButtonTooltip title="Cuadrado lleno" handler={() => handleAddRectangle(true)}>
                         {icons.rect.full}
                       </ButtonTooltip>
                     </Stack>
@@ -453,7 +461,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
                       <ButtonTooltip title="Cirulo hueco" handler={() => handleAddCircle()}>
                         {icons.circle.empty}
                       </ButtonTooltip>
-                      <ButtonTooltip title="Circulo lleno" handler={() => handleAddCircle("fill")}>
+                      <ButtonTooltip title="Circulo lleno" handler={() => handleAddCircle(true)}>
                         {icons.circle.full}
                       </ButtonTooltip>
                     </Stack>

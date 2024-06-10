@@ -20,14 +20,14 @@ export default function ButtonTooltip({
 }) {
   return (
     <Tooltip
-      title={<Typography sx={{ color: "text.primary", fontWeight: 600 }}>{title}</Typography>}
+      title={<Typography variant="title">{title}</Typography>}
       placement={placement}
       arrow
       sx={{ zIndex: 1 }}
       componentsProps={{
         tooltip: {
           sx: {
-            backgroundColor: "light",
+            backgroundColor: "white",
             border: "1px solid black",
           },
         },

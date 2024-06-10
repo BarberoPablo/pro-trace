@@ -48,12 +48,33 @@ export default function App() {
           }),
     },
     typography: {
-      fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
+      fontFamily: "Arial",
       fontSize: 16,
+
       title: {
-        fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
         fontSize: 18,
-        fontWeight: 600,
+        color: "rgb(59,59,59)",
+      },
+      reference: {
+        fontFamily: "Arial",
+        fontSize: 16,
+        color: "rgb(59,59,59)",
+      },
+    },
+    components: {
+      MuiButton: {
+        defaultProps: {
+          style: {
+            textTransform: "none",
+          },
+        },
+      },
+      MuiToggleButton: {
+        defaultProps: {
+          style: {
+            textTransform: "none",
+          },
+        },
       },
     },
   });

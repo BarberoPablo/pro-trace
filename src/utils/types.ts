@@ -20,3 +20,14 @@ export type ShapeDetails = {
   height: number;
   color: string;
 };
+
+export type BodyPart = "prostata" | "radiografia";
+export type Shapes = "circle" | "rect" | "rhombus";
+
+export type ReferenceData = {
+  image: string;
+  references: {
+    shapes: { [key in Shapes]: string };
+    fill: { [key: string]: string };
+  };
+};
