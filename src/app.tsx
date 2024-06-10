@@ -50,7 +50,6 @@ export default function App() {
     typography: {
       fontFamily: "Arial",
       fontSize: 16,
-
       title: {
         fontSize: 18,
         color: "rgb(59,59,59)",

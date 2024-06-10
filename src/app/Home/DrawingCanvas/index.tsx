@@ -351,7 +351,7 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   }, [editor, saveHistory, handleRedo, handleUndo, handleDeleteSelected]);
 
   return (
-    <Box>
+    <Box sx={{}}>
       <Stack sx={{ alignItems: "center", gap: 2 }}>
         <Container sx={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <Stack
@@ -387,9 +387,11 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               <ZoomOut sx={{ width: "100%", height: "100%" }} />
             </ButtonTooltip>
 
-            <ButtonTooltip title="Abrir menu de figuras geométricas" handler={toggleShapes} active={selectedMode === "shapes"}>
-              <Interests sx={{ width: "100%", height: "100%" }} />
-            </ButtonTooltip>
+            {false && (
+              <ButtonTooltip title="Abrir menu de figuras geométricas" handler={toggleShapes} active={selectedMode === "shapes"}>
+                <Interests sx={{ width: "100%", height: "100%" }} />
+              </ButtonTooltip>
+            )}
 
             <ButtonTooltip title="Eliminar selección" handler={handleDeleteSelected}>
               <Delete sx={{ width: "100%", height: "100%" }} />
@@ -404,7 +406,11 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
             </ButtonTooltip>
           </Stack>
 
-          <ImageReferences bodyPart="prostata" handleData={{ circle: handleAddCircle, rect: handleAddRectangle, rhombus: handleAddRectangle }} />
+          <ImageReferences
+            bodyPart="prostata"
+            handleData={{ circle: handleAddCircle, rect: handleAddRectangle, rhombus: handleAddRectangle }}
+            handleColor={setColor}
+          />
 
           {modes.includes(selectedMode) && (
             <Box sx={{ position: "sticky", width: "100%", top: 0, zIndex: 1 }}>
@@ -578,7 +584,9 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
               </Box>
             </Box>
           )}
-          <FabricJSCanvas className="sample-canvas" onReady={onReady} />
+          <Box ml={20}>
+            <FabricJSCanvas className="sample-canvas" onReady={onReady} />
+          </Box>
         </Container>
       </Stack>
     </Box>

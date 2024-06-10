@@ -29,5 +29,6 @@ export type ReferenceData = {
   references: {
     shapes: { [key in Shapes]: string };
     fill: { [key: string]: string };
+    colors: { [key: string]: string };
   };
 };

@@ -76,10 +76,19 @@ export const references: { [key in BodyPart]?: ReferenceData } = {
         circle: "Nódulo dérmico",
         rect: "Colección",
         rhombus: "Lesión cicatrizal",
+        //triangle: "Sinus" ?
       },
       fill: {
         full: "Activa\n(relleno)",
         empty: "Inactiva\n(vacío)",
+      },
+      colors: {
+        black: "Fístula",
+        orange: "Dérmica",
+        grey: "Dermoepidérmica",
+        red: "Dermohipodérmica",
+        "#44BCA1": "Hipodérmica",
+        "#274989": "Compleja",
       },
     },
   },

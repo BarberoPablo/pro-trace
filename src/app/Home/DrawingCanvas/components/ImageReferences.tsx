@@ -1,20 +1,34 @@
 import { icons, references } from "@/utils/constants";
 import { BodyPart, ReferenceData, Shapes } from "@/utils/types";
-import { Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { ModeEditOutlineOutlined } from "@mui/icons-material";
+import { Box, Button, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import * as React from "react";
 
 export default function ImageReferences({
   bodyPart,
   handleData,
+  handleColor,
 }: {
   bodyPart: BodyPart;
   handleData: { [key in Shapes]: (fill?: boolean, angle?: number) => void };
+  handleColor: React.Dispatch<React.SetStateAction<{ stroke: string; fill: string }>>;
+  //handleColor: ({ stroke, fill }: { stroke: string; fill: string }) => void;
 }) {
   const [referenceData] = React.useState<ReferenceData | undefined>(references[bodyPart]);
-  const [fill, setFill] = React.useState<string>("empty");
+  const [fill, setFill] = React.useState<string>("full");
+  const [selectedColor, setSelectedColor] = React.useState<string>("black");
 
-  const handleChangeFill = (value: string) => {
+  const handleChangeFillType = (value: string) => {
     setFill(value);
+  };
+
+  const handleChangeColor = (color: string) => {
+    setSelectedColor(color);
+    handleColor((prevColor) => ({
+      ...prevColor,
+      stroke: color,
+      fill: color,
+    }));
   };
 
   return (
@@ -24,16 +38,16 @@ export default function ImageReferences({
           backgroundColor: "white",
           position: "absolute",
           borderRadius: 2,
-          px: 2,
-          top: 100,
-          left: -30,
+          px: 1,
+          top: 80,
+          left: -104,
           py: 1,
           zIndex: 2,
           opacity: 0.9,
         }}
       >
-        <Box>
-          {referenceData && (
+        {referenceData && (
+          <Box sx={{ display: "flex", flexDirection: "row" }}>
             <Stack sx={{ width: "100%" }}>
               {Object.keys(referenceData.references.shapes).map((shape) => (
                 <Button
@@ -46,7 +60,7 @@ export default function ImageReferences({
                 </Button>
               ))}
               <Box sx={{ display: "flex", justifyContent: "center", mt: 1, height: 70 }}>
-                <ToggleButtonGroup color="primary" value={fill} exclusive onChange={(_event, value) => handleChangeFill(value)} aria-label="Platform">
+                <ToggleButtonGroup color="primary" value={fill} exclusive onChange={(_event, value) => handleChangeFillType(value)}>
                   {Object.keys(referenceData.references.fill).map((fill) => (
                     <ToggleButton key={fill} value={fill}>
                       <Typography variant="reference" sx={{ whiteSpace: "pre-wrap" }}>
@@ -57,8 +71,23 @@ export default function ImageReferences({
                 </ToggleButtonGroup>
               </Box>
             </Stack>
-          )}
-        </Box>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 1, backgroundColor: "rgb(150,150,150)" }} />
+
+            <Stack>
+              <ToggleButtonGroup color="primary" value={selectedColor} exclusive onChange={(_event, value) => handleChangeColor(value)}>
+                <Stack>
+                  {Object.keys(referenceData.references.colors).map((colorKey) => (
+                    <ToggleButton key={colorKey} value={colorKey} sx={{ justifyContent: "initial", height: 40 }}>
+                      <ModeEditOutlineOutlined sx={{ color: colorKey }} />
+                      <Typography variant="reference">{referenceData.references.colors[colorKey]}</Typography>
+                    </ToggleButton>
+                  ))}
+                </Stack>
+              </ToggleButtonGroup>
+            </Stack>
+          </Box>
+        )}
       </Box>
     </Box>
   );
