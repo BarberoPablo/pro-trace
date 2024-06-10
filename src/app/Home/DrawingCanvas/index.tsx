@@ -1,4 +1,5 @@
-import radiografia from "@/assets/radiografia.png";
+import radiografia from "@/assets/body/radiografia.png";
+import prostata from "@/assets/body/prostata.png";
 import { icons, modes, darkThemePallet } from "@/utils/constants";
 import {
   CloudDownload,
@@ -54,11 +55,11 @@ export default function DrawingCanvas(/* recibir la imagen a renderizar */) {
   React.useEffect(() => {
     if (editor?.canvas) {
       const img = new Image();
-      img.src = radiografia;
+      img.src = prostata;
       img.onload = function () {
         editor.canvas.setWidth(img.width);
         editor.canvas.setHeight(img.height);
-        editor.canvas.setBackgroundImage(radiografia, editor.canvas.renderAll.bind(editor.canvas));
+        editor.canvas.setBackgroundImage(prostata, editor.canvas.renderAll.bind(editor.canvas));
         editor.canvas.freeDrawingBrush.color = initialColor;
         setIsCanvasReady(true);
       };
